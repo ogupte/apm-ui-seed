@@ -1,36 +1,36 @@
-const parseArgs = require('minimist');
-const elasticsearch = require('elasticsearch');
+const parseArgs = require("minimist");
+const elasticsearch = require("elasticsearch");
 
 const argv = parseArgs(process.argv.slice(2), {
-  string: ['host', 'index', 'service-name'],
-  boolean: ['help'],
+  string: ["host", "index", "service-name"],
+  boolean: ["help"],
   alias: {
-    help: ['h'],
-    host: ['H'],
-    index: ['i'],
-    'service-name': ['s'],
+    help: ["h"],
+    host: ["H"],
+    index: ["i"],
+    "service-name": ["s"]
   },
   default: {
-    host: 'localhost:9200',
-    index: 'apm-8.0.0-transaction',
-    'service-name': 'client',
-  },
+    host: "localhost:9200",
+    index: "apm-8.0.0-transaction",
+    "service-name": "client"
+  }
 });
 
 const OPT_HOST = argv.host;
 const OPT_INDEX = argv.index;
-const OPT_SERVICE_NAME = argv['service-name'];
+const OPT_SERVICE_NAME = argv["service-name"];
 const OPT_HELP = !!argv.help;
-const CMD_CLEAN = argv._.includes('clean');
-const CMD_SEED = argv._.includes('seed');
-const CMD_LIST = argv._.includes('list') || argv._.length === 0;
-const CMD_HELP = argv._.includes('help');
+const CMD_CLEAN = argv._.includes("clean");
+const CMD_SEED = argv._.includes("seed");
+const CMD_LIST = argv._.includes("list") || argv._.length === 0;
+const CMD_HELP = argv._.includes("help");
 
 if (OPT_HELP || CMD_HELP) {
   console.log(
     `
 usage: apm-ui-seed-geo [--host=<host:port>] [--index=<index>]
-                                  [--service-name=<name>] <commands>
+                       [--service-name=<name>] <commands>
 
 Options & defaults:
    --host='localhost:9200'
@@ -55,46 +55,46 @@ Example:
     --index='apm-8.0.0-transaction-000001'
     --service-name='client'
     clean seed list
-  `.trim(),
+  `.trim()
   );
   process.exit(0);
 }
 
 const client = new elasticsearch.Client({
   host: OPT_HOST,
-  log: 'error',
+  log: "error"
 });
 
 const cleanPageLoadClientGeo = async client => {
   const response = await client.updateByQuery({
     index: OPT_INDEX,
     waitForCompletion: true,
-    waitForActiveShards: 'all',
-    refresh: 'true',
+    waitForActiveShards: "all",
+    refresh: "true",
     body: {
       query: {
         bool: {
           filter: [
             {
-              term: { 'service.name': OPT_SERVICE_NAME },
+              term: { "service.name": OPT_SERVICE_NAME }
             },
             {
-              term: { 'processor.event': 'transaction' },
+              term: { "processor.event": "transaction" }
             },
             {
-              term: { 'transaction.type': 'page-load' },
+              term: { "transaction.type": "page-load" }
             },
             {
-              exists: { field: 'client.geo.country_iso_code' },
-            },
-          ],
-        },
+              exists: { field: "client.geo.country_iso_code" }
+            }
+          ]
+        }
       },
       script: {
         source: `ctx._source.client.remove('geo')`,
-        lang: 'painless',
-      },
-    },
+        lang: "painless"
+      }
+    }
   });
 
   console.log(`Removed client.geo for ${response.updated} documents.`);
@@ -109,57 +109,57 @@ const getAvailableDocumentIds = async client => {
         bool: {
           filter: [
             {
-              term: { 'service.name': OPT_SERVICE_NAME },
+              term: { "service.name": OPT_SERVICE_NAME }
             },
             {
-              term: { 'processor.event': 'transaction' },
+              term: { "processor.event": "transaction" }
             },
             {
-              term: { 'transaction.type': 'page-load' },
+              term: { "transaction.type": "page-load" }
             },
             {
-              exists: { field: 'client.ip' },
-            },
+              exists: { field: "client.ip" }
+            }
           ],
           must_not: {
-            exists: { field: 'client.geo.country_iso_code' },
-          },
-        },
+            exists: { field: "client.geo.country_iso_code" }
+          }
+        }
       },
-      _source: false,
-    },
+      _source: false
+    }
   });
 
   return body.hits.hits.map(({ _id }) => _id);
 };
 
 const countryCodes = [
-  'US',
-  'DK',
-  'NL',
-  'DE',
-  'AT',
-  'AU',
-  'CA',
-  'ES',
-  'IL',
-  'CH',
-  'GB',
-  'FR',
-  'BR',
-  'CN',
-  'RU',
-  'IN',
-  'IT',
-  'MX',
-  'NO',
-  'PL',
-  'PR',
-  'PT',
-  'SA',
-  'SE',
-  'TH',
-  'TR',
+  "US",
+  "DK",
+  "NL",
+  "DE",
+  "AT",
+  "AU",
+  "CA",
+  "ES",
+  "IL",
+  "CH",
+  "GB",
+  "FR",
+  "BR",
+  "CN",
+  "RU",
+  "IN",
+  "IT",
+  "MX",
+  "NO",
+  "PL",
+  "PR",
+  "PT",
+  "SA",
+  "SE",
+  "TH",
+  "TR"
 ];
 
 const getRandomCountryCode = () => {
@@ -173,18 +173,18 @@ const seedBatchedCountryCodes = async (client, ids) => {
       ...body,
       { update: { _id: id } },
       {
-        doc: { client: { geo: { country_iso_code: getRandomCountryCode() } } },
-      },
+        doc: { client: { geo: { country_iso_code: getRandomCountryCode() } } }
+      }
     ];
   }, []);
 
   try {
     const response = await client.bulk({
-      waitForActiveShards: 'all',
-      refresh: 'true',
+      waitForActiveShards: "all",
+      refresh: "true",
       index: OPT_INDEX,
-      _source: ['client.geo.country_iso_code'],
-      body,
+      _source: ["client.geo.country_iso_code"],
+      body
     });
     console.log(`Updated ${response.items.length} documents.`);
   } catch (e) {
@@ -204,7 +204,7 @@ const seedAvailableCountryCodes = async (client, ids, allIds = []) => {
       return seedAvailableCountryCodes(client, nextIds, allIds.concat(ids));
     } else {
       console.log(
-        `Finished setting random values at client.geo.country_iso_code for ${allIds.length} documents.`,
+        `Finished setting random values at client.geo.country_iso_code for ${allIds.length} documents.`
       );
       return allIds;
     }
@@ -220,42 +220,42 @@ const listAvgPageLoadByCountry = async client => {
         bool: {
           filter: [
             {
-              term: { 'service.name': OPT_SERVICE_NAME },
+              term: { "service.name": OPT_SERVICE_NAME }
             },
             {
-              term: { 'processor.event': 'transaction' },
+              term: { "processor.event": "transaction" }
             },
             {
-              term: { 'transaction.type': 'page-load' },
+              term: { "transaction.type": "page-load" }
             },
             {
-              exists: { field: 'client.geo.country_iso_code' },
-            },
-          ],
-        },
+              exists: { field: "client.geo.country_iso_code" }
+            }
+          ]
+        }
       },
       aggs: {
         foo: {
           terms: {
-            field: 'client.geo.country_iso_code',
-            size: countryCodes.length,
+            field: "client.geo.country_iso_code",
+            size: countryCodes.length
           },
           aggs: {
             avg_duration: {
-              avg: { field: 'transaction.duration.us' },
-            },
-          },
-        },
-      },
-    },
+              avg: { field: "transaction.duration.us" }
+            }
+          }
+        }
+      }
+    }
   });
   const buckets = body.aggregations.foo.buckets;
   const results = buckets.map(
     ({ key, doc_count, avg_duration: { value } }) => ({
       country_iso2_code: key,
       count: doc_count,
-      avg_duration_us: Math.round(value),
-    }),
+      avg_duration_us: Math.round(value)
+    })
   );
   console.log(results);
   return results;
