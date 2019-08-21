@@ -29,7 +29,7 @@ This project makes the following executable scripts available:
 ```
 > apm-ui-seed-geo --help
 usage: apm-ui-seed-geo [--host=<host:port>] [--index=<index>]
-                                  [--service-name=<name>] <commands>
+                       [--service-name=<name>] <commands>
 
 Options & defaults:
    --host='localhost:9200'
