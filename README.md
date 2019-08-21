@@ -7,7 +7,7 @@ A CLI tool that generates data to develop and test features in Kibana's APM plug
 
 ## Install 
 ```
-yarn add -G https://github.com/ogupte/apm-ui-seed.git
+yarn global add https://github.com/ogupte/apm-ui-seed/archive/master.tar.gz
 ```
 
 OR
