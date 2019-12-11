@@ -8,6 +8,7 @@ const argv = parseArgs(process.argv.slice(2), {
     help: ["h"],
     host: ["H"],
     index: ["i"],
+    auth: ["a"],
     "service-name": ["s"]
   },
   default: {
@@ -20,6 +21,7 @@ const argv = parseArgs(process.argv.slice(2), {
 const OPT_HOST = argv.host;
 const OPT_INDEX = argv.index;
 const OPT_SERVICE_NAME = argv["service-name"];
+const OPT_AUTH = argv.auth;
 const OPT_HELP = !!argv.help;
 const CMD_CLEAN = argv._.includes("clean");
 const CMD_SEED = argv._.includes("seed");
@@ -39,6 +41,8 @@ Options & defaults:
     -i
    --service-name='client'
     -s
+   --auth
+    -a
    --help
     -h
 
@@ -62,7 +66,8 @@ Example:
 
 const client = new elasticsearch.Client({
   host: OPT_HOST,
-  log: "error"
+  log: "error",
+  httpAuth: OPT_AUTH || undefined
 });
 
 const cleanPageLoadClientGeo = async client => {
@@ -273,6 +278,6 @@ const listAvgPageLoadByCountry = async client => {
   }
   process.exit(0);
 })().catch(error => {
-  console.trace(error.message);
+  console.trace(error.stack);
   process.exit(1);
 });
