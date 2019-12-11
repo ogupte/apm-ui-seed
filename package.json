@@ -1,6 +1,6 @@
 {
   "name": "apm-ui-seed",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "main": "apm-ui-seed-geo.js",
   "license": "Apache-2.0",
   "bin": {

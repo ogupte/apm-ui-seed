@@ -17,14 +17,17 @@ const argv = parseArgs(process.argv.slice(2), {
 const OPT_HOST = argv.host;
 const OPT_AUTH = argv.auth;
 const OPT_HELP = !!argv.help;
-const CMD_CLEAN = argv._.includes("clean");
+const CMD_INSTALL = argv._.includes("install");
+const CMD_UNINSTALL = argv._.includes("uninstall");
 const CMD_HELP = argv._.includes("help");
 
-if (OPT_HELP || CMD_HELP) {
+const noCommand = !(CMD_INSTALL || CMD_UNINSTALL || CMD_HELP);
+
+if (OPT_HELP || CMD_HELP || noCommand) {
   console.log(
     `
 usage: apm-ui-service-map-ingest [--host=<host:port>]
-                       [--auth=<user:password>] <commands>
+                       [--auth=<user:password>] <command>
 
 Options & defaults:
    --host='localhost:9200'
@@ -35,13 +38,15 @@ Options & defaults:
     -h
 
 Commands:
-   clean      Removes the apm_extract_destination from the apm ingest pipeline and then deletes it
+   install    Creates apm_extract_destination ingest pipline and applies it to the apm ingest pipeline
+   uninstall  Removes the apm_extract_destination from the apm ingest pipeline and then deletes it
    help       Shows this help message
 
 Example:
    apm-ui-service-map-ingest
     --host='localhost:9200'
-    clean
+    --auth='user:password'
+    install
   `.trim()
   );
   process.exit(0);
@@ -190,12 +195,12 @@ async function removeExtractDestinationFromApm(client) {
   ]);
 }
 
-async function setupIngestPipeline(client) {
+async function installIngestPipeline(client) {
   await putIngestPipelineExtractDestination(client);
   return await applyExtractDestinationToApm(client);
 }
 
-async function cleanIngestPipeline(client) {
+async function uninstallIngestPipeline(client) {
   try {
     await removeExtractDestinationFromApm(client);
   } catch (error) {
@@ -206,10 +211,10 @@ async function cleanIngestPipeline(client) {
 }
 
 (async () => {
-  if (CMD_CLEAN) {
-    await cleanIngestPipeline(client);
-  } else {
-    await setupIngestPipeline(client);
+  if (CMD_INSTALL) {
+    await installIngestPipeline(client);
+  } else if (CMD_UNINSTALL) {
+    await uninstallIngestPipeline(client);
   }
   process.exit(0);
 })().catch(error => {
