@@ -25,6 +25,7 @@ bin/apm-ui-seed-geo --help
 ## Usage
 This project makes the following executable scripts available:
 - `apm-ui-seed-geo`
+- `apm-ui-service-map-ingest`
 
 ```
 > apm-ui-seed-geo --help
@@ -54,4 +55,27 @@ Example:
     --index='apm-8.0.0-transaction-000001'
     --service-name='client'
     clean seed list
+```
+
+```
+> apm-ui-service-map-ingest --help
+usage: apm-ui-service-map-ingest [--host=<host:port>]
+                       [--auth=<user:password>] <commands>
+
+Options & defaults:
+   --host='localhost:9200'
+    -H
+   --auth
+    -a
+   --help
+    -h
+
+Commands:
+   clean      Removes the apm_extract_destination from the apm ingest pipeline and then deletes it
+   help       Shows this help message
+
+Example:
+   apm-ui-service-map-ingest
+    --host='localhost:9200'
+    clean
 ```

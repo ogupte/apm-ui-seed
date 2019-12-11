@@ -1,13 +1,15 @@
 {
   "name": "apm-ui-seed",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "main": "apm-ui-seed-geo.js",
   "license": "Apache-2.0",
   "bin": {
-    "apm-ui-seed-geo": "bin/apm-ui-seed-geo"
+    "apm-ui-seed-geo": "bin/apm-ui-seed-geo",
+    "apm-ui-service-map-ingest": "bin/apm-ui-service-map-ingest"
   },
   "scripts": {
-    "apm-ui-seed-geo": "node apm-ui-seed-geo.js"
+    "apm-ui-seed-geo": "node apm-ui-seed-geo.js",
+    "apm-ui-service-map-ingest": "node apm-ui-service-map-ingest.js"
   },
   "dependencies": {
     "elasticsearch": "^16.3.0",
