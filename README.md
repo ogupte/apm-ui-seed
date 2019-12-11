@@ -39,6 +39,8 @@ Options & defaults:
     -i
    --service-name='client'
     -s
+   --auth
+    -a
    --help
     -h
 
@@ -60,7 +62,7 @@ Example:
 ```
 > apm-ui-service-map-ingest --help
 usage: apm-ui-service-map-ingest [--host=<host:port>]
-                       [--auth=<user:password>] <commands>
+                       [--auth=<user:password>] <command>
 
 Options & defaults:
    --host='localhost:9200'
@@ -71,11 +73,13 @@ Options & defaults:
     -h
 
 Commands:
-   clean      Removes the apm_extract_destination from the apm ingest pipeline and then deletes it
+   install    Creates apm_extract_destination ingest pipline and applies it to the apm ingest pipeline
+   uninstall  Removes the apm_extract_destination from the apm ingest pipeline and then deletes it
    help       Shows this help message
 
 Example:
    apm-ui-service-map-ingest
     --host='localhost:9200'
-    clean
+    --auth='user:password'
+    install
 ```
